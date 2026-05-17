@@ -1,52 +1,53 @@
-import { products } from "./mock/products.js";
+const API_ROOT = '/api';
 
-let database = [...products];
+// Função genérica para chamar a API do backend.
+async function apiRequest(path, options = {}) {
+    const response = await fetch(`${API_ROOT}${path}`, {
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        ...options
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    if (response.status === 204) {
+        return null;
+    }
+
+    return response.json();
+}
 
 export async function getProducts() {
-    return database;
+    return apiRequest('/products');
 }
 
 export async function addProduct(product) {
-    const newProduct = {
-        id: Date.now(),
-        name: product.name,
-        sector: product.sector,
-        quantity: product.quantity ?? 0
-    };
-
-    database.push(newProduct);
+    return apiRequest('/products', {
+        method: 'POST',
+        body: JSON.stringify(product)
+    });
 }
 
 export async function deleteProduct(id) {
-    database = database.filter(product => product.id !== id);
+    return apiRequest(`/products/${id}`, {
+        method: 'DELETE'
+    });
 }
 
 export async function updateQuantity(id, amount) {
-    database = database.map(product => {
-
-        if (product.id === id) {
-
-            const newQuantity = product.quantity + amount;
-
-            return {
-                ...product,
-                quantity: newQuantity < 0 ? 0 : newQuantity
-            };
-        }
-
-        return product;
+    return apiRequest(`/products/${id}/quantity`, {
+        method: 'PATCH',
+        body: JSON.stringify({ amount })
     });
 }
 
 export async function updateProduct(id, data) {
-    database = database.map(product => {
-        if (product.id === id) {
-            return {
-                ...product,
-                ...data
-            };
-        }
-
-        return product;
+    return apiRequest(`/products/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data)
     });
 }

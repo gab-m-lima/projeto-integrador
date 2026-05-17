@@ -8,6 +8,21 @@ import {
 
 import { renderProducts } from "./render.js";
 
+// Front-end principal do aplicativo.
+// Carrega produtos da API e controla os modais de criar/editar/excluir.
+/* =========================================================
+   INITIALIZATION
+========================================================= */
+
+async function initializeApp() {
+    try {
+        await loadProducts();
+        console.log('✓ Products loaded');
+    } catch (error) {
+        console.error('Failed to initialize application:', error);
+    }
+}
+
 /* =========================================================
    STATE
 ========================================================= */
@@ -153,6 +168,8 @@ async function openDeleteModal(id) {
 ========================================================= */
 
 document.addEventListener("click", async (event) => {
+    // Listener global para todos os botões da interface.
+    // Usa delegation para capturar ação de aumento, redução, edição e exclusão.
 
     const increaseBtn = event.target.closest(".increase-btn");
     if (increaseBtn) {
@@ -171,6 +188,12 @@ document.addEventListener("click", async (event) => {
     const newItemBtn = event.target.closest("#add-new-product-type");
     if (newItemBtn) {
         await openNewProductModal();
+        return;
+    }
+
+    const exportDbBtn = event.target.closest("#export-database");
+    if (exportDbBtn) {
+        await exportDatabaseToFile();
         return;
     }
 
@@ -231,4 +254,4 @@ export function getStockStatus(quantity) {
    INIT
 ========================================================= */
 
-loadProducts();
+initializeApp();

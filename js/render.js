@@ -1,3 +1,4 @@
+// Renderiza a tabela de produtos na interface.
 export function renderProducts(products) {
 
     const tbody = document.querySelector("tbody");
