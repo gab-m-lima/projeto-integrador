@@ -110,35 +110,6 @@ function initializeDatabase() {
         migrateTransaction(oldProducts);
     }
 
-    if (produtoCount === 0 && !oldProductsTableExists) {
-        const seedProducts = [
-            { nome_produto: 'Arroz', setor_produto: 'Grãos', qtd_atual: 22 },
-            { nome_produto: 'Feijão', setor_produto: 'Grãos', qtd_atual: 80 },
-            { nome_produto: 'Macarrão', setor_produto: 'Massas', qtd_atual: 10 },
-            { nome_produto: 'Café', setor_produto: 'Bebidas', qtd_atual: 5 }
-        ];
-
-        const insertProduto = db.prepare(
-            'INSERT INTO produto (nome_produto, setor_produto, dt_criacao, dt_atualizacao) VALUES (?, ?, datetime(\'now\'), datetime(\'now\'))'
-        );
-        const insertEstoque = db.prepare(
-            'INSERT INTO estoque (id_produto, qtd_atual, qtd_min, dt_criacao, dt_atualizacao) VALUES (?, ?, 0, datetime(\'now\'), datetime(\'now\'))'
-        );
-        const insertAudit = db.prepare(
-            'INSERT INTO audit_log (action, entity_type, entity_id, new_values, timestamp, details) VALUES (?, ?, ?, ?, datetime(\'now\'), ?)'
-        );
-
-        const insertTransaction = db.transaction((items) => {
-            for (const item of items) {
-                const result = insertProduto.run(item.nome_produto, item.setor_produto);
-                insertEstoque.run(result.lastInsertRowid, item.qtd_atual);
-                insertAudit.run('CREATE', 'product', result.lastInsertRowid, JSON.stringify(item), 'Seed data');
-            }
-        });
-
-        insertTransaction(seedProducts);
-    }
-
     if (!tableExists('produto')) {
         throw new Error('Falha ao criar a tabela produto');
     }
